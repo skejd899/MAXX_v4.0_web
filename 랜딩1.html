@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>MAXX Private AI</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap');
+
+/* --- 1. 기본 스타일 및 변수 --- */
+:root {
+--bg-color: #000000;
+--text-color: #e8e8e8;
+--highlight-color: #ffffff;
+--accent-color: #a0a0a0;
+--key-color: #5f0f08;
+--key-text-color: #bd7048;
+--divider-color: #2a2a2a;
+--card-bg-color: #0a0a0a;
+--ios-form-bg: #1c1c1e;
+--ios-separator-color: rgba(84, 84, 88, 0.65);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+background-color: var(--bg-color);
+color: var(--text-color);
+font-family: 'Noto Sans KR', sans-serif;
+-webkit-font-smoothing: antialiased;
+-moz-osx-font-smoothing: grayscale;
+word-break: keep-all;
+overflow-x: hidden;
+}
+
+/* --- 2. 레이아웃 및 섹션 --- */
+.container { max-width: 680px; margin: 0 auto; padding: 0 25px; }
+section { 
+padding: 140px 0;
+text-align: center;
+position: relative;
+background-image: radial-gradient(ellipse 80% 50% at 50% 20%, rgba(95, 15, 8, 0.08), transparent 90%);
+background-repeat: no-repeat;
+background-position: center top;
+background-size: 100% 100%;
+}
+.hero { min-height: 100vh; padding: 100px 0; display: flex; flex-direction: column; justify-content: center; }
+hr.divider { width: 40px; height: 2px; background-color: var(--key-color); border: none; margin: 140px auto; }
+
+/* --- 3. 타이포그래피 --- */
+h1 { font-size: clamp(2.4rem, 8vw, 3.2rem); font-weight: 700; color: var(--highlight-color); line-height: 1.3; letter-spacing: -0.025em; }
+h2 { font-size: clamp(2rem, 7vw, 2.8rem); font-weight: 600; color: var(--highlight-color); margin-bottom: 20px; line-height: 1.4; letter-spacing: -0.02em; }
+.sub-headline { font-size: clamp(1rem, 4vw, 1.2rem); font-weight: 400; color: var(--accent-color); line-height: 1.7; max-width: 550px; margin: 0 auto 40px auto; }
+p { font-size: clamp(0.95rem, 3.5vw, 1.05rem); font-weight: 400; line-height: 1.8; }
+strong { font-weight: 700; }
+.key-color-text { font-weight: 700; color: var(--key-text-color); }
+.caption { font-size: 0.8rem; color: var(--accent-color); margin-top: 20px; }
+
+/* --- 3.5. 히어로 헤드라인 후광 효과 --- */
+.hero-headline {
+    position: relative; /* ::after 가상 요소의 기준점이 됨 */
+    z-index: 1; /* 텍스트가 후광 효과보다 위에 오도록 설정 */
+    margin-top: 10px; /* 기존 인라인 스타일을 클래스로 이동 */
+}
+
+.hero-headline::after {
+    content: '';
+    position: absolute;
+    /* 중앙 정렬 */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    /* 텍스트 영역보다 넓게 설정 */
+    width: 140%;
+    height: 160%;
+    /* 후광 효과의 핵심 */
+    background: var(--key-color);
+    filter: blur(80px); /* 블러 강도. 수치가 클수록 부드럽게 퍼짐 */
+    opacity: 0.8;       /* 은은한 효과를 위한 투명도 */
+    z-index: -1;        /* 텍스트 뒤로 보내기 */
+    border-radius: 50%; /* 빛이 둥글게 퍼지도록 설정 */
+}
+
+/* --- 4. 컴포넌트 --- */
+.cta-button {
+display: inline-block; text-decoration: none; color: var(--highlight-color); background-color: var(--key-color);
+padding: 16px 40px; font-size: 1rem; font-weight: 500; border-radius: 8px; border: 1px solid var(--key-color);
+cursor: pointer; transition: all 0.3s ease;
+}
+.cta-button:hover { background-color: #7a130a; border-color: #7a130a; transform: scale(1.05); }
+
+#lang-switcher { position: fixed; top: 25px; right: 25px; font-size: 1.5rem; cursor: pointer; z-index: 1000; transition: transform 0.2s ease; user-select: none; }
+#lang-switcher:hover { transform: scale(1.1); }
+
+.performance-box { margin-top: 60px; padding: 40px; background-color: var(--card-bg-color); border: 1px solid var(--divider-color); border-radius: 12px; display: grid; grid-template-columns: 1fr; gap: 40px; align-items: center; }
+@media (min-width: 600px) { .performance-box { grid-template-columns: 1fr 1.5fr; } }
+.donut-chart-container { position: relative; width: 150px; height: 150px; margin: 0 auto; }
+.donut-chart-center { width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+.donut-chart-center .value { font-size: 2.2rem; color: var(--highlight-color); font-weight: 600; }
+.donut-chart-center .label { font-size: 0.8rem; color: var(--accent-color); letter-spacing: 0.1em; text-transform: uppercase;}
+.donut-chart-svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; transform: rotate(-90deg); }
+.donut-chart-svg circle { fill: transparent; }
+.donut-chart-background { stroke: var(--divider-color); stroke-width: 10; }
+.donut-chart-progress { stroke: var(--key-text-color); stroke-width: 10; stroke-dasharray: 408.4; stroke-dashoffset: 104.5; stroke-linecap: round; transition: stroke-dashoffset 1.5s ease-in-out; }
+.performance-stats { display: flex; flex-direction: column; gap: 20px; }
+.stat-item .value { font-size: clamp(2.2rem, 8vw, 2.8rem); color: var(--highlight-color); font-weight: 600; }
+.stat-item .label { font-size: 0.8rem; color: var(--accent-color); margin-top: 5px; text-transform: uppercase; letter-spacing: 0.1em; }
+
+.feature-grid { display: grid; grid-template-columns: 1fr; gap: 20px; margin-top: 50px; }
+@media (min-width: 600px) { .feature-grid { grid-template-columns: 1fr 1fr; } }
+.feature-box { background-color: var(--card-bg-color); border: 1px solid var(--divider-color); padding: 30px; border-radius: 12px; }
+.feature-box h3 { font-size: 1.25rem; margin-bottom: 15px; color: var(--highlight-color); }
+.feature-box p { font-size: 1rem; color: var(--accent-color); }
+.feature-box.center-content { text-align: center; }
+.feature-box.center-content p { line-height: 1.9; }
+
+.funnel-container { position: relative; padding-top: 40px; margin-top: 60px; }
+.funnel-container::before {
+content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+width: 0; height: 0; border-left: 180px solid transparent; border-right: 180px solid transparent;
+border-top: 500px solid #101010; z-index: -1; opacity: 0.5;
+}
+.funnel-step { margin-bottom: 60px; position: relative; }
+.funnel-step p { margin: 0; font-weight: 300; transition: transform 0.3s ease; }
+.funnel-step:hover p { transform: scale(1.05); }
+.funnel-step::after {
+content: '▼'; font-size: 1.5rem; color: var(--divider-color); position: absolute;
+bottom: -40px; left: 50%; transform: translateX(-50%);
+}
+.funnel-step:last-child { margin-bottom: 0; }
+.funnel-step:last-child::after { content: ''; }
+#step1 p { font-size: 1.3rem; color: var(--accent-color); }
+#step2 p { font-size: 1.7rem; color: var(--text-color); }
+#step3 p { font-size: 2.1rem; color: var(--highlight-color); }
+#step4 p { font-size: 2.5rem; }
+.slider-container { margin-top: 60px; position: relative; }
+.slider-wrapper { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+.slider-wrapper::-webkit-scrollbar { display: none; }
+.slide { flex: 0 0 90%; scroll-snap-align: center; margin-right: 15px; }
+.slide img { width: 100%; border-radius: 12px; display: block; }
+.slider-caption { font-size: 0.9rem; color: var(--accent-color); margin-top: 20px; }
+
+.reveal-on-scroll { opacity: 0; transform: translateY(40px); transition: opacity 1s ease-out, transform 1s ease-out; will-change: opacity, transform; }
+.reveal-on-scroll.is-visible { opacity: 1; transform: translateY(0); }
+
+/* --- 4.5. 개선된 비교 테이블 (중앙 정렬) --- */
+.comparison-table {
+    margin-top: 60px;
+    background-color: var(--card-bg-color);
+    border: 1px solid var(--divider-color);
+    border-radius: 16px;
+    overflow: hidden;
+}
+.comparison-header {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    padding: 20px 25px;
+    background-color: rgba(255, 255, 255, 0.03);
+    text-align: center;
+}
+.comparison-header h3 {
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+.header-legacy {
+    color: var(--accent-color);
+}
+.header-maxx {
+    color: var(--key-text-color);
+    font-weight: 700;
+}
+.vs-divider {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--divider-color);
+    padding: 0 15px;
+}
+.comparison-body {
+    padding: 10px 25px 25px 25px;
+    text-align: center;
+}
+.comparison-row {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 15px;
+    padding: 20px 0;
+    border-top: 1px solid var(--divider-color);
+}
+.comparison-row:first-child {
+    border-top: none;
+}
+.comparison-row .col-legacy p {
+    color: #888;
+    font-size: 0.95rem;
+}
+.comparison-row .col-category {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--highlight-color);
+}
+.comparison-row .col-maxx p {
+    color: var(--highlight-color);
+    font-weight: 500;
+    font-size: 1.425rem; /* 폰트 크기 1.5배로 수정 */
+    line-height: 1.5; /* 줄 간격 추가 */
+}
+
+/* --- 5. iOS 스타일 폼 --- */
+#contact-form {
+text-align: left;
+margin-top: 60px;
+}
+.form-input-group {
+background-color: var(--ios-form-bg);
+border-radius: 12px;
+overflow: hidden;
+margin-bottom: 25px;
+}
+.form-group {
+display: flex;
+align-items: center;
+border-bottom: 1px solid var(--ios-separator-color);
+padding: 0 20px;
+}
+.form-group:last-child {
+border-bottom: none;
+}
+.form-group label {
+flex: 0 0 110px;
+font-size: 1rem;
+color: var(--text-color);
+padding-right: 10px;
+}
+.form-group input, .form-group select {
+flex: 1;
+width: 100%;
+padding: 18px 0;
+background: transparent;
+border: none;
+outline: none;
+color: var(--highlight-color);
+font-size: 1rem;
+font-family: 'Noto Sans KR', sans-serif;
+caret-color: var(--key-text-color);
+}
+.form-group select {
+appearance: none;
+-webkit-appearance: none;
+background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1.41 0.589966L6 5.16997L10.59 0.589966L12 1.99997L6 7.99997L0 1.99997L1.41 0.589966Z' fill='%23A0A0A0'/%3E%3C/svg%3E");
+background-repeat: no-repeat;
+background-position: right 5px center;
+padding-right: 25px;
+}
+select option {
+background-color: var(--ios-form-bg);
+color: var(--text-color);
+}
+#contact-form .cta-button {
+width: 100%;
+font-weight: 600;
+font-size: 1.1rem;
+padding: 18px 0;
+}
+</style>
+</head>
+<body>
+<div id="lang-switcher">🌐</div>
+
+<main>
+<section class="hero">
+<div class="container reveal-on-scroll">
+<p class="sub-headline" data-lang-key="heroSubheadline">당신은 초대받은 소수 중 한 명입니다.</p>
+<h2 style="font-size: 1.5rem; margin-top: 40px;" data-lang-key="heroTitle">THE MAXX V4.0</h2>
+<h1 class="hero-headline" data-lang-key="heroHeadline">시장은 감정이 아닌<br>원칙이 지배합니다.</h1><p style="max-width: 450px; margin: 30px auto 50px auto; font-size: 1.1rem; color: var(--accent-color);" data-lang-key="heroParagraph">
+시장의 공포와 탐욕은 <span class="key-color-text">시스템의 가장 확실한 데이터</span> 입니다.
+</p>
+<a href="#contact" class="cta-button" data-lang-key="heroButton">MAXX V4.0 신청하기</a>
+</div>
+</section>
+
+<hr class="divider">
+
+<section>
+<div class="container reveal-on-scroll">
+<h2 data-lang-key="proofTitle">증명은 조용히,<br>결과로만 이루어집니다.</h2>
+<p class="sub-headline" data-lang-key="proofSubheadline">극소수에게만 허락된 시그널의 일부입니다.</p>
+<div class="slider-container">
+<div class="slider-wrapper">
+<div class="slide"><img src="./images/chart1.jpeg" alt="MAXX 4.0 실제 매매 타점 1"></div>
+<div class="slide"><img src="./images/chart2.jpeg" alt="MAXX 4.0 실제 매매 타점 2"></div>
+<div class="slide"><img src="./images/chart3.jpeg" alt="MAXX 4.0 실제 매매 타점 3"></div>
+<div class="slide"><img src="./images/chart4.jpeg" alt="MAXX 4.0 실제 매매 타점 4"></div>
+</div>
+</div>
+<p class="slider-caption" data-lang-key="proofCaption">보이는 것은 빙산의 일각에 불과합니다.</p>
+</div>
+</section>
+<hr class="divider">
+
+<section>
+<div class="container reveal-on-scroll">
+<h2 data-lang-key="gapTitle">왜 <span class="key-color-text">MAXX 4.0</span>인가?</h2>
+<p class="sub-headline" data-lang-key="gapSubheadline">보이지 않는 차이의 근원</p>
+<div class="comparison-table">
+    <div class="comparison-header">
+        <h3 class="header-legacy" data-lang-key="compHeaderLegacy">U사 자동매매 프로그램</h3>
+        <span class="vs-divider">vs</span>
+        <h3 class="header-maxx" data-lang-key="compHeaderMaxx">MAXX V4.0</h3>
+    </div>
+    <div class="comparison-body">
+        <div class="comparison-row">
+            <div class="col-legacy"><p data-lang-key="compRow1Val2">과거 데이터의 추종</p></div>
+            <div class="col-category"><p data-lang-key="compRow1Cat">대응</p></div>
+            <div class="col-maxx"><p><strong data-lang-key="compRow1Val3">AI 실시간 시장 분석</strong></p></div>
+        </div>
+        <div class="comparison-row">
+            <div class="col-legacy"><p data-lang-key="compRow2Val2">단순 지표 IF-THEN 조건</p></div>
+            <div class="col-category"><p data-lang-key="compRow2Cat">판단</p></div>
+            <div class="col-maxx"><p><strong data-lang-key="compRow2Val3">AI 비선형 최적 판단</strong></p></div>
+        </div>
+        <div class="comparison-row">
+            <div class="col-legacy"><p data-lang-key="compRow3Val2">개발자의 업데이트에 의존</p></div>
+            <div class="col-category"><p data-lang-key="compRow3Cat">진화</p></div>
+            <div class="col-maxx"><p><strong data-lang-key="compRow3Val3">스스로 학습 자가최적화</strong></p></div>
+        </div>
+        <div class="comparison-row">
+            <div class="col-legacy"><p data-lang-key="compRow4Val2">특정 시장에서만 유효</p></div>
+            <div class="col-category"><p data-lang-key="compRow4Cat">결과</p></div>
+            <div class="col-maxx"><p><strong data-lang-key="compRow4Val3">모든 시장에서 꾸준한 우상향</strong></p></div>
+        </div>
+    </div>
+</div>
+</div>
+</section>
+
+<hr class="divider">
+<section>
+<div class="container reveal-on-scroll">
+<h2 data-lang-key="dataTitle">신뢰는<br>오직 데이터로 증명합니다.</h2>
+<p class="sub-headline" data-lang-key="dataSubheadline">감정적 동요가 배제된 <span class="key-color-text">냉철한 확률 게임의 결과</span>를 확인하십시오.</p>
+<div class="performance-box">
+<div class="donut-chart-container">
+<svg class="donut-chart-svg" viewBox="0 0 140 140">
+<circle class="donut-chart-background" cx="70" cy="70" r="65"></circle>
+<circle class="donut-chart-progress" cx="70" cy="70" r="65"></circle>
+</svg>
+<div class="donut-chart-center">
+<div class="value" data-lang-key="winRateValue1">74.4%</div>
+<div class="label" data-lang-key="winRateLabel1">WIN RATE</div>
+</div>
+</div>
+<div class="performance-stats">
+<div class="stat-item">
+<p class="value" data-lang-key="winRateValue2">432 / 581</p>
+<p class="label" data-lang-key="winRateLabel2">Total Trades</p>
+</div>
+<div class="stat-item">
+<p class="value" data-lang-key="profitFactorValue">2.41</p>
+<p class="label" data-lang-key="profitFactorLabel">PROFIT FACTOR</p>
+</div>
+</div>
+</div>
+<p class="caption" data-lang-key="performanceCaption">(2025.09.01-2025.09.18 실제 테스트 결과)</p>
+</div>
+</section>
+
+<hr class="divider" style="margin: 180px auto;">
+
+<section>
+<div class="container reveal-on-scroll">
+<h2 data-lang-key="riskTitle">수익을 지키는<br>3중 리스크 관리</h2>
+<p class="sub-headline" data-lang-key="riskSubheadline"><span class="key-color-text">자산의 보존은 수익 창출의 제1원칙입니다.</span> MAXX는 예측이 아닌 통제를 통해 자산을 보호합니다.</p>
+<div class="feature-grid">
+<div class="feature-box center-content">
+<h3 data-lang-key="riskFeature1Title"><span class="key-color-text">분할 익절 및 리스크 제거</span></h3>
+<p data-lang-key="riskFeature1Desc">진입과 동시에 설정되는 절대 방어선. 모든 시나리오의 최악을 미리 대비합니다.</p>
+</div>
+<div class="feature-box center-content">
+<h3 data-lang-key="riskFeature2Title"><span class="key-color-text">하이브리드 추적 익절</span></h3>
+<p data-lang-key="riskFeature2Desc">변동성을 따라 움직이며 <strong style="color:var(--highlight-color)">확보된 수익을 지키고</strong>, 시장의 끝까지 추적하여 복리를 극대화합니다.</p>
+</div>
+</div>
+</div>
+</section>
+
+<hr class="divider">
+
+<section>
+<div class="container reveal-on-scroll">
+<h2 data-lang-key="alchemyTitle">스스로 진화하는<br>AI 발전 4단계</h2>
+<p class="sub-headline" data-lang-key="alchemySubheadline">시장의 보이지 않는 질서를 재구성하는 과정입니다.</p>
+<div class="funnel-container">
+<div id="step1" class="funnel-step"><p data-lang-key="alchemyStep1">1. 시장의 혼돈 속 질서 발견</p></div>
+<div id="step2" class="funnel-step"><p data-lang-key="alchemyStep2">2. 수천 개의 변수 동시 연산</p></div>
+<div id="step3" class="funnel-step"><p data-lang-key="alchemyStep3">3. 최적의 확률에 대한 결단</p></div>
+<div id="step4" class="funnel-step"><p data-lang-key="alchemyStep4">4. <strong class="key-color-text">자가 진화 시스템 (RAPO)</strong></p></div>
+</div>
+</div>
+</section>
+
+<hr class="divider">
+
+<section id="contact">
+<div class="container reveal-on-scroll">
+<h2 data-lang-key="contactTitle">MAXX V4.0을 사용해볼<br>준비가 되셨습니까?</h2>
+<p class="sub-headline" data-lang-key="contactSubheadline">엄격한 심사를 통해 소수의 인원에게만 프로그램 접근 권한을 부여합니다. 아래 정보를 남겨주시면 담당자가 개별 연락을 통해 가능 여부를 안내합니다.</p>
+<form id="contact-form" action="#" method="post">
+<div class="form-input-group">
+<div class="form-group">
+<label for="name" data-lang-key="formName">성함</label>
+<input type="text" id="name" name="name" required>
+</div>
+<div class="form-group">
+<label for="phone" data-lang-key="formPhone">연락처</label>
+<input type="tel" id="phone" name="phone" required>
+</div>
+<div class="form-group">
+<label for="email" data-lang-key="formEmail">이메일</label>
+<input type="email" id="email" name="email" required>
+</div>
+<div class="form-group">
+<label for="experience" data-lang-key="formMarket">주요 투자 시장</label>
+<select id="experience" name="experience" required>
+<option value="" disabled selected data-lang-key="formMarketOption0">선택</option>
+<option value="해외선물" data-lang-key="formMarketOption1">해외선물</option>
+<option value="코인현물" data-lang-key="formMarketOption2">코인현물</option>
+<option value="코인선물" data-lang-key="formMarketOption3">코인선물</option>
+<option value="국내주식" data-lang-key="formMarketOption4">국내주식</option>
+<option value="해외주식" data-lang-key="formMarketOption5">해외주식</option>
+</select>
+</div>
+<div class="form-group">
+<label for="seed" data-lang-key="formCapital">운용 자산 규모</label>
+<select id="seed" name="seed" required>
+<option value="" disabled selected data-lang-key="formCapitalOption0">선택</option>
+<option value="500만원 이하" data-lang-key="formCapitalOption1">500만원 이하</option>
+<option value="1000만원 이하" data-lang-key="formCapitalOption2">1000만원 이하</option>
+<option value="5000만원 이하" data-lang-key="formCapitalOption3">5000만원 이하</option>
+<option value="1억 이하" data-lang-key="formCapitalOption4">1억 이하</option>
+<option value="10억 이하" data-lang-key="formCapitalOption5">10억 이하</option>
+</select>
+</div>
+<div class="form-group">
+<label for="contact-time" data-lang-key="formTime">통화 가능 시간</label>
+<input type="text" id="contact-time" name="contact-time" data-lang-key="formTimePlaceholder" placeholder="예: 평일 오후 2시~5시">
+</div>
+</div>
+<button type="submit" class="cta-button" data-lang-key="formButton">비공개 리스트 등록</button>
+</form>
+</div>
+</section>
+</main>
+<footer>
+<div class="container" style="padding: 40px 25px; text-align: center;">
+<p style="font-size: 0.8rem; color: #6e6e73;">MAXX AI SYSTEMS © 2025</p>
+<p style="font-size: 0.8rem; color: #6e6e73; margin-top: 10px;" data-lang-key="footerDisclaimer">본 시스템은 보조 도구이며, 모든 판단과 그에 따른 최종 책임은 투자자 본인에게 귀속됩니다. 과거의 성과는 미래의 수익을 보장하지 않습니다.</p>
+</div>
+</footer>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+const langData = {
+ko: {
+heroSubheadline: "당신은 초대받은 소수 중 한 명입니다.",
+heroTitle: "THE MAXX V4.0",
+heroHeadline: "시장은 감정이 아닌<br>원칙이 지배합니다.",
+heroParagraph: "시장의 공포와 탐욕은 <span class=\"key-color-text\">시스템의 가장 확실한 데이터</span> 입니다.",
+heroButton: "MAXX V4.0 신청하기",
+proofTitle: "증명은 조용히,<br>결과로만 이루어집니다.",
+proofSubheadline: "극소수에게만 허락된 시그널의 일부입니다.",
+proofCaption: "보이는 것은 빙산의 일각에 불과합니다.",
+gapTitle: "왜 <span class='key-color-text'>MAXX 4.0</span>인가?",
+gapSubheadline: "보이지 않는 차이의 근원",
+compHeaderLegacy: "U사 자동매매 프로그램",
+compHeaderMaxx: "MAXX V4.0",
+compRow1Cat: "대응",
+compRow1Val2: "과거 데이터의 추종",
+compRow1Val3: "AI 실시간 시장 분석",
+compRow2Cat: "판단",
+compRow2Val2: "단순 지표 IF-THEN 조건",
+compRow2Val3: "AI 비선형 최적 판단",
+compRow3Cat: "진화",
+compRow3Val2: "개발자의 업데이트에 의존",
+compRow3Val3: "스스로 학습 자가최적화",
+compRow4Cat: "결과",
+compRow4Val2: "특정 시장에서만 유효",
+compRow4Val3: "모든 시장에서 꾸준한 우상향",
+dataTitle: "신뢰는<br>오직 데이터로 증명합니다.",
+dataSubheadline: "감정적 동요가 배제된 <span class=\"key-color-text\">냉철한 확률 게임의 결과</span>를 확인하십시오.",
+performanceCaption: "(2025.09.01-2025.09.18 실제 테스트 결과)",
+winRateValue1: "74.4%",
+winRateLabel1: "WIN RATE",
+winRateValue2: "432 / 581",
+winRateLabel2: "Total Trades",
+profitFactorValue: "2.41",
+profitFactorLabel: "PROFIT FACTOR",
+riskTitle: "수익을 지키는<br>3중 리스크 관리",
+riskSubheadline: "<span class=\"key-color-text\">자산의 보존은 수익 창출의 제1원칙입니다.</span> MAXX는 예측이 아닌 통제를 통해 자산을 보호합니다.",
+riskFeature1Title: "<span class=\"key-color-text\">분할 익절 및 리스크 제거</span>",
+riskFeature1Desc: "진입과 동시에 설정되는 절대 방어선. 모든 시나리오의 최악을 미리 대비합니다.",
+riskFeature2Title: "<span class=\"key-color-text\">하이브리드 추적 익절</span>",
+riskFeature2Desc: "변동성을 따라 움직이며 <strong style=\"color:var(--highlight-color)\">확보된 수익을 지키고</strong>, 시장의 끝까지 추적하여 복리를 극대화합니다.",
+alchemyTitle: "스스로 진화하는<br>AI 발전 4단계",
+alchemySubheadline: "시장의 보이지 않는 질서를 재구성하는 과정입니다.",
+alchemyStep1: "1. 시장의 혼돈 속 질서 발견",
+alchemyStep2: "2. 수천 개의 변수 동시 연산",
+alchemyStep3: "3. 최적의 확률에 대한 결단",
+alchemyStep4: "4. <strong class=\"key-color-text\">자가 진화 시스템 (RAPO)</strong>",
+contactTitle: "생태계에 합류할<br>준비가 되셨습니까?",
+contactSubheadline: "엄격한 검토를 통해 소수의 인원에게만 생태계 접근 권한을 부여합니다. 아래 정보를 남겨주시면 담당자가 개별 연락을 통해 가능 여부를 안내합니다.",
+formName: "성함",
+formPhone: "연락처",
+formEmail: "이메일",
+formMarket: "주요 투자 시장",
+formMarketOption0: "선택",
+formMarketOption1: "해외선물",
+formMarketOption2: "코인현물",
+formMarketOption3: "코인선물",
+formMarketOption4: "국내주식",
+formMarketOption5: "해외주식",
+formCapital: "운용 자산 규모",
+formCapitalOption0: "선택",
+formCapitalOption1: "500만원 이하",
+formCapitalOption2: "1000만원 이하",
+formCapitalOption3: "5000만원 이하",
+formCapitalOption4: "1억 이하",
+formCapitalOption5: "10억 이하",
+formTime: "통화 가능 시간",
+formTimePlaceholder: "예: 평일 오후 2시~5시",
+formButton: "비공개 리스트 등록",
+footerDisclaimer: "본 시스템은 보조 도구이며, 모든 판단과 그에 따른 최종 책임은 투자자 본인에게 귀속됩니다. 과거의 성과는 미래의 수익을 보장하지 않습니다.",
+alertMsg: "요청이 접수되었습니다. 자격 심사 후 순차적으로 연락드리겠습니다."
+},
+en: {
+heroSubheadline: "You are one of the few who have been invited.",
+heroTitle: "THE MAXX V4.0",
+heroHeadline: "The market is governed by<br>principles, not emotions.",
+heroParagraph: "The market's fear and greed are the <span class=\"key-color-text\">system's most reliable data</span>.",
+heroButton: "Apply for MAXX V4.0",
+proofTitle: "Proof is made quietly,<br>only through results.",
+proofSubheadline: "A fraction of the signals permitted only to a select few.",
+proofCaption: "What you see is merely the tip of the iceberg.",
+gapTitle: "Why <span class='key-color-text'>MAXX 4.0</span>?",
+gapSubheadline: "The source of the unseen difference",
+compHeaderLegacy: "Company U's Auto-Trading",
+compHeaderMaxx: "MAXX V4.0",
+compRow1Cat: "Response",
+compRow1Val2: "Following past data",
+compRow1Val3: "Real-time AI Market Analysis",
+compRow2Cat: "Judgment",
+compRow2Val2: "Simple IF-THEN Logic",
+compRow2Val3: "Non-linear AI Optimization",
+compRow3Cat: "Evolution",
+compRow3Val2: "Reliant on developer updates",
+compRow3Val3: "Self-learning & Auto-optimization",
+compRow4Cat: "Result",
+compRow4Val2: "Effective only in specific markets",
+compRow4Val3: "Consistent growth in all markets",
+dataTitle: "Trust is proven<br>only by data.",
+dataSubheadline: "Witness the outcome of a <span class=\"key-color-text\">cold, calculated game of probability</span>, devoid of emotional sway.",
+performanceCaption: "(Actual test results from 2025.09.01-2025.09.18)",
+winRateValue1: "74.4%",
+winRateLabel1: "WIN RATE",
+winRateValue2: "432 / 581",
+winRateLabel2: "Total Trades",
+profitFactorValue: "2.41",
+profitFactorLabel: "PROFIT FACTOR",
+riskTitle: "Triple-layered Risk<br>Management to Protect Profit",
+riskSubheadline: "<span class=\"key-color-text\">Capital preservation is the first principle of profit generation.</span> MAXX protects assets through control, not prediction.",
+riskFeature1Title: "<span class=\"key-color-text\">Partial Profit-take & Risk Removal</span>",
+riskFeature1Desc: "An absolute defensive line set upon entry, preparing for the worst-case scenario in advance.",
+riskFeature2Title: "<span class=\"key-color-text\">Hybrid Trailing Stop-loss</span>",
+riskFeature2Desc: "It moves with volatility, <strong style=\"color:var(--highlight-color)\">securing the profits made</strong> and maximizing compound returns by tracking to the market's end.",
+alchemyTitle: "The 4 Stages of<br>Self-Evolving AI",
+alchemySubheadline: "A process of reconfiguring the market's invisible order.",
+alchemyStep1: "1. Discovering order in market chaos",
+alchemyStep2: "2. Computing thousands of variables",
+alchemyStep3: "3. Deciding on optimal probability",
+alchemyStep4: "4. <strong class=\"key-color-text\">Self-Evolving System (RAPO)</strong>",
+contactTitle: "Are You Ready to Join<br>the Ecosystem?",
+contactSubheadline: "Access to the ecosystem is granted to a select few through a rigorous review. Leave your information below, and a representative will contact you regarding your eligibility.",
+formName: "Full Name",
+formPhone: "Contact",
+formEmail: "Email",
+formMarket: "Primary Market",
+formMarketOption0: "Select",
+formMarketOption1: "Futures",
+formMarketOption2: "Crypto Spot",
+formMarketOption3: "Crypto Futures",
+formMarketOption4: "Domestic Stocks",
+formMarketOption5: "International Stocks",
+formCapital: "Asset Size",
+formCapitalOption0: "Select",
+formCapitalOption1: "Under $5,000",
+formCapitalOption2: "Under $10,000",
+formCapitalOption3: "Under $50,000",
+formCapitalOption4: "Under $100,000",
+formCapitalOption5: "Under $1,000,000",
+formTime: "Available Time",
+formTimePlaceholder: "e.g., Weekdays 2 PM - 5 PM",
+formButton: "Register on Private List",
+footerDisclaimer: "This system is an auxiliary tool. All judgments and resulting responsibilities belong to the investor. Past performance does not guarantee future returns.",
+alertMsg: "Your request has been submitted. We will contact you sequentially after a qualification review."
+}
+};
+
+const langSwitcher = document.getElementById('lang-switcher');
+let currentLang = 'ko';
+
+const setLanguage = (lang) => {
+// 페이지 전체 언어 속성 변경
+document.documentElement.lang = lang;
+
+// data-lang-key 속성을 가진 모든 요소 순회
+const elements = document.querySelectorAll('[data-lang-key]');
+elements.forEach(el => {
+const key = el.getAttribute('data-lang-key');
+if (langData[lang] && langData[lang][key]) {
+// 플레이스홀더 속성인지 확인
+if (key.includes('Placeholder')) {
+el.placeholder = langData[lang][key];
+} else {
+el.innerHTML = langData[lang][key];
+}
+}
+});
+};
+
+// 언어 전환 버튼 이벤트 리스너
+langSwitcher.addEventListener('click', () => {
+currentLang = (currentLang === 'ko') ? 'en' : 'ko';
+setLanguage(currentLang);
+});
+
+// 스크롤 시 나타나는 애니메이션
+const revealElements = document.querySelectorAll('.reveal-on-scroll');
+const observer = new IntersectionObserver((entries) => {
+entries.forEach(entry => {
+if (entry.isIntersecting) {
+entry.target.classList.add('is-visible');
+observer.unobserve(entry.target);
+}
+});
+}, { threshold: 0.1 });
+revealElements.forEach(el => observer.observe(el));
+
+// 폼 제출 이벤트
+const form = document.getElementById('contact-form');
+form.addEventListener('submit', (e) => {
+e.preventDefault();
+alert(langData[currentLang].alertMsg); // 현재 언어에 맞는 알림 메시지 표시
+form.reset();
+});
+
+// 초기 언어 설정
+setLanguage(currentLang);
+});
+</script>
+</body>
+</html>
