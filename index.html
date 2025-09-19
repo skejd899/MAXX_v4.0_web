@@ -406,7 +406,7 @@ padding: 18px 0;
 <div class="container reveal-on-scroll">
 <h2 data-lang-key="contactTitle">MAXX V4.0을 사용해볼<br>준비가 되셨습니까?</h2>
 <p class="sub-headline" data-lang-key="contactSubheadline">엄격한 심사를 통해 소수의 인원에게만 프로그램 접근 권한을 부여합니다. 아래 정보를 남겨주시면 담당자가 개별 연락을 통해 가능 여부를 안내합니다.</p>
-<form id="contact-form" name="contact" netlify>
+<form id="contact-form" name="contact" netlify action="/success.html">
 <div class="form-input-group">
 <div class="form-group">
 <label for="name" data-lang-key="formName">성함</label>
@@ -646,12 +646,6 @@ observer.unobserve(entry.target);
 revealElements.forEach(el => observer.observe(el));
 
 // 폼 제출 이벤트
-const form = document.getElementById('contact-form');
-form.addEventListener('submit', (e) => {
-e.preventDefault();
-alert(langData[currentLang].alertMsg); // 현재 언어에 맞는 알림 메시지 표시
-form.reset();
-});
 
 // 초기 언어 설정
 setLanguage(currentLang);
